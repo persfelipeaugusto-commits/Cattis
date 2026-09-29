@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cattis · Sobreaviso e Consignado</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#13233F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sobreaviso">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#13233F; --muted:#5B6B82; --line:#D6DEE9;
+  --blue:#1F5FA8; --blue-soft:#E3EDF9;
+  --sa:#B8740F; --sa-soft:#FBF0DC; --cg:#167A63; --cg-soft:#DDF2EC;
+  --ok:#1E8A4C; --warn:#B7791F; --bad:#C0392B; --ok-soft:#E1F3E8; --warn-soft:#FBF1DC; --bad-soft:#FBE4E1;
+  --r:14px; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#0E1726; --surface:#16223A; --ink:#E6ECF5; --muted:#9AA9C0; --line:#2A3A57; --blue:#6FA6EA; --blue-soft:#1C2F4E;
+  --sa:#E9A441; --sa-soft:#3A2D15; --cg:#4FC3A1; --cg-soft:#123A31; --ok:#5CCB8A; --warn:#E8B45A; --bad:#F07F72;
+  --ok-soft:#15352A; --warn-soft:#3A2F17; --bad-soft:#3D1F1C;}}
+:root[data-theme="dark"]{
+  --bg:#0E1726; --surface:#16223A; --ink:#E6ECF5; --muted:#9AA9C0; --line:#2A3A57; --blue:#6FA6EA; --blue-soft:#1C2F4E;
+  --sa:#E9A441; --sa-soft:#3A2D15; --cg:#4FC3A1; --cg-soft:#123A31; --ok:#5CCB8A; --warn:#E8B45A; --bad:#F07F72;
+  --ok-soft:#15352A; --warn-soft:#3A2F17; --bad-soft:#3D1F1C;}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px 110px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 2px 10px}
+.brand h1{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:.8rem}
+.sync{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.banner{background:var(--warn-soft);border-radius:10px;padding:10px 12px;font-size:.85rem;margin-bottom:12px;display:none}
+.view{display:none}.view.active{display:block}
+.kind{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:18px;padding:5px;gap:5px;border:1px solid var(--line);margin-bottom:14px}
+.kind button{border:0;border-radius:14px;padding:14px 10px;font:inherit;font-weight:700;font-size:.95rem;background:transparent;color:var(--muted);cursor:pointer;text-align:left;line-height:1.2}
+.kind button small{display:block;font-weight:500;font-size:.72rem;margin-top:3px}
+.kind button[aria-pressed="true"][data-k="sobreaviso"]{background:var(--sa);color:#fff}
+.kind button[aria-pressed="true"][data-k="consignado"]{background:var(--cg);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.l{display:block;font-weight:600;font-size:.88rem;margin-bottom:6px}.l .opt{color:var(--muted);font-weight:400}
+input,textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px}
+textarea{min-height:92px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 6px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.hint{font-size:.78rem;color:var(--muted);margin-top:5px}
+.err{font-size:.8rem;color:var(--bad);margin-top:5px;display:none}
+.field.invalid input,.field.invalid textarea{border-color:var(--bad)}.field.invalid .err{display:block}
+.drop{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:12px;padding:14px;cursor:pointer;background:var(--bg)}
+.drop .ic{width:42px;height:42px;border-radius:10px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;flex:none}
+.drop b{display:block;font-size:.9rem}.drop span{font-size:.78rem;color:var(--muted)}
+.preview{display:none;margin-top:10px;align-items:center;gap:10px}
+.preview img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.pdf{width:64px;height:64px;border-radius:8px;background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-weight:800;font-size:.8rem}
+.link{background:none;border:0;color:var(--blue);font:inherit;font-weight:600;padding:4px 0;cursor:pointer;text-decoration:none}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font:inherit;font-weight:700;font-size:1rem;background:var(--blue);color:#fff;cursor:pointer;text-align:center}
+.btn:disabled{opacity:.55}
+.btn.ghost{background:var(--surface);color:var(--blue);border:1px solid var(--line)}
+.btn.small{display:inline-block;width:auto;padding:10px 14px;font-size:.88rem;border-radius:10px}
+.stack>*+*{margin-top:10px}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.filters .full{grid-column:1/-1}
+.rec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;border-left:6px solid var(--sa)}
+.rec.consignado{border-left-color:var(--cg)}.rec.cancelado{opacity:.6}
+.rec summary{list-style:none;padding:12px 14px;cursor:pointer}.rec summary::-webkit-details-marker{display:none}
+.rec .l1{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.rec .l2{color:var(--muted);font-size:.83rem;margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--bg);color:var(--muted)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.rec .body{padding:0 14px 14px;font-size:.9rem}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;margin:6px 0 10px}.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-word}
+.att img{max-width:100%;border-radius:10px;border:1px solid var(--line);margin:4px 0 8px}
+.hist{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:.78rem;color:var(--muted)}.hist div{margin:2px 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.empty{text-align:center;color:var(--muted);padding:34px 14px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi .v{font-size:1.55rem;font-weight:800;line-height:1.1}.kpi .t{font-size:.78rem;color:var(--muted);margin-top:3px}
+.kpi.sa .v{color:var(--sa)}.kpi.cg .v{color:var(--cg)}
+h2{font-size:1rem;margin:4px 0 10px;font-weight:800}h2 small{font-weight:500;color:var(--muted);font-size:.78rem}
+.bar{margin-bottom:9px}.bar .h{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px}.bar .h span:last-child{color:var(--muted)}
+.track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;display:flex}.track i{display:block;height:100%}
+.slabar{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--bg);margin:6px 0 8px}.slabar i{display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.alert{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.86rem}.alert:first-of-type{border-top:0}
+.alert .s{flex:none;width:8px;border-radius:4px}
+.sug{padding:10px 12px;border-radius:10px;background:var(--blue-soft);margin-bottom:8px;font-size:.87rem}
+.check{display:flex;gap:10px;align-items:center;font-size:.9rem}.check input{width:22px;height:22px;flex:none}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:10}
+nav.tabs button{border:0;background:none;font:inherit;font-size:.72rem;font-weight:600;color:var(--muted);padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border-radius:10px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-soft)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--surface);
+  padding:11px 16px;border-radius:12px;font-size:.88rem;font-weight:600;transition:.25s;pointer-events:none;z-index:20;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#report{display:none}
+
+/* ---------- print report ---------- */
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  :root{padding:0}
+  body{background:#fff;color:#111;font-size:10.5pt}
+  .wrap,nav.tabs,.toast{display:none!important}
+  #report{display:block!important}
+  #report h1{font-size:16pt;margin:0 0 2pt}
+  #report .meta{color:#555;font-size:9pt;margin-bottom:10pt}
+  #report h3{break-after:avoid;page-break-after:avoid;font-size:11.5pt;margin:14pt 0 5pt;border-bottom:1.5pt solid #13233F;padding-bottom:2pt;color:#13233F}
+  #report table{width:100%;border-collapse:collapse;font-size:8.5pt}
+  #report th,#report td{border:0.5pt solid #bbb;padding:3pt 4pt;text-align:left;vertical-align:top}
+  #report th{background:#E3EDF9}
+  #report .kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6pt}
+  #report .k{border:0.5pt solid #bbb;border-radius:4pt;padding:5pt 7pt}
+  #report .k b{display:block;font-size:13pt}
+  #report .num{text-align:right}
+  #report .v{color:#1E8A4C;font-weight:700}#report .a{color:#B7791F;font-weight:700}#report .r{color:#C0392B;font-weight:700}
+  #report ul{margin:3pt 0;padding-left:14pt}
+  #report .anx{page-break-inside:avoid;margin:8pt 0;border:0.5pt solid #bbb;padding:6pt}
+  #report .anx img{max-width:100%;max-height:185mm;display:block;margin-top:4pt}
+  #report .sign{margin-top:30pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt}
+  #report .sign div{border-top:0.8pt solid #333;padding-top:3pt;font-size:9pt;text-align:center}
+  tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>Sobreaviso e consignado</h1><p>Cattis Medical · Estoque/Logística</p></div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt">Salvo no celular</span></div>
+  </header>
+  <div class="banner" id="banner"></div>
+
+  <!-- REGISTRAR -->
+  <section class="view active" id="v-form">
+    <div class="kind" role="group" aria-label="Tipo de registro">
+      <button type="button" data-k="sobreaviso" aria-pressed="true">Acionamento de sobreaviso<small>Chamado fora do expediente</small></button>
+      <button type="button" data-k="consignado" aria-pressed="false">Contagem de consignado<small>Conferência no hospital</small></button>
+    </div>
+    <form id="f" novalidate autocomplete="off">
+      <div class="card">
+        <div class="field" data-f="colaborador"><label class="l" for="colaborador">Colaborador</label>
+          <input id="colaborador" list="dl-colab" placeholder="Seu nome"><div class="err">Informe o colaborador.</div></div>
+        <div class="row2">
+          <div class="field" data-f="data"><label class="l" for="data">Data</label><input id="data" type="date"><div class="err">Data inválida.</div></div>
+          <div class="field" data-f="hora"><label class="l" for="hora">Hora</label><input id="hora" type="time"><div class="err">Informe a hora.</div></div>
+        </div>
+        <div class="field" data-f="quem"><label class="l" for="quem">Quem acionou</label>
+          <input id="quem" list="dl-quem" placeholder="Nome / setor / hospital"><div class="err">Informe quem acionou.</div></div>
+        <div class="field" data-f="motivo"><label class="l" for="motivo">Motivo</label>
+          <textarea id="motivo" placeholder="Descreva por extenso o que aconteceu e o que foi feito"></textarea><div class="err">Descreva o motivo (mínimo 15 caracteres).</div></div>
+      </div>
+      <div class="card">
+        <div class="field" data-f="rota"><label class="l" for="rota">Rota</label>
+          <input id="rota" list="dl-rota" placeholder="Ex.: Casa > Hosp. Sírio-Libanês > Casa"><div class="err">Informe a rota.</div></div>
+        <div class="field"><span class="l" id="lbl-transp">Transporte</span>
+          <div class="seg" id="transp" role="group" aria-labelledby="lbl-transp">
+            <button type="button" data-t="carro" aria-pressed="true">Carro próprio</button>
+            <button type="button" data-t="uber" aria-pressed="false">Uber</button>
+            <button type="button" data-t="outro" aria-pressed="false">Outro</button>
+          </div></div>
+        <div class="row2">
+          <div class="field" data-f="km"><label class="l" for="km">KM</label>
+            <input id="km" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"><div class="err">KM inválido.</div></div>
+          <div class="field"><label class="l" for="valor">Valor R$ <span class="opt">(opcional)</span></label>
+            <input id="valor" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00"></div>
+        </div>
+        <div class="field"><span class="l" id="lbl-anexo">Comprovante de abastecimento</span>
+          <label class="drop" for="file">
+            <span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+            <span><b>Tirar foto ou escolher arquivo</b><span>Imagem ou PDF · a foto é comprimida para ocupar pouco espaço</span></span>
+          </label>
+          <input id="file" type="file" accept="image/*,application/pdf" class="sr">
+          <div class="preview" id="preview"><span id="pvThumb"></span><div><div id="pvName" style="font-size:.85rem;font-weight:600"></div><button type="button" class="link" id="pvClear">Remover</button></div></div>
+          <div class="hint">Sem comprovante o registro fica pendente na auditoria. Dá para anexar depois em Registros.</div>
+        </div>
+      </div>
+      <button class="btn" id="save" type="submit">Salvar registro</button>
+    </form>
+  </section>
+
+  <!-- REGISTROS -->
+  <section class="view" id="v-list">
+    <div class="filters">
+      <input type="month" id="fMes" aria-label="Mês">
+      <select id="fTipo" aria-label="Tipo"><option value="">Todos os tipos</option><option value="sobreaviso">Sobreaviso</option><option value="consignado">Consignado</option></select>
+      <input type="search" id="fBusca" class="full" placeholder="Buscar colaborador, motivo, rota…" aria-label="Buscar">
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <!-- PAINEL -->
+  <section class="view" id="v-dash">
+    <div class="filters" style="grid-template-columns:1fr"><input type="month" id="dMes" aria-label="Mês do painel"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="card"><h2>SLA de lançamento <small>tempo entre o acionamento e o registro</small></h2><div id="sla"></div></div>
+    <div class="card"><h2>Por colaborador</h2><div id="byColab"></div></div>
+    <div class="card"><h2>Quem mais acionou</h2><div id="byQuem"></div></div>
+    <div class="card"><h2>Auditoria <small>pontos a conferir</small></h2><div id="audit"></div></div>
+    <div class="card"><h2>Sugestões de melhoria</h2><div id="sugs"></div></div>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section class="view" id="v-rep">
+    <div class="card">
+      <h2>Gerar relatório</h2>
+      <div class="field"><label class="l" for="rMes">Mês</label><input type="month" id="rMes"></div>
+      <div class="row2">
+        <div class="field"><label class="l" for="rTipo">Tipo</label><select id="rTipo"><option value="">Todos</option><option value="sobreaviso">Sobreaviso</option><option value="consignado">Consignado</option></select></div>
+        <div class="field"><label class="l" for="rColab">Colaborador</label><select id="rColab"><option value="">Todos</option></select></div>
+      </div>
+      <div class="field"><label class="check"><input type="checkbox" id="rAnx" checked> Incluir fotos dos comprovantes (para reembolso)</label></div>
+      <div class="stack">
+        <button class="btn" type="button" id="bPdf">Relatório em PDF</button>
+        <button class="btn ghost" type="button" id="bCsv">Planilha para Excel (.csv)</button>
+      </div>
+      <div class="hint" style="margin-top:10px">No PDF, escolha a impressora “Salvar como PDF”. Depois é só compartilhar por WhatsApp ou e-mail.</div>
+    </div>
+    <div class="card">
+      <h2>Backup e consolidação</h2>
+      <p class="hint" style="margin-top:0">Os dados ficam só neste celular. Faça backup toda semana. Para juntar a equipe, cada colaborador envia o backup e o gestor importa no celular dele.</p>
+      <div class="stack">
+        <button class="btn ghost" type="button" id="bBackup">Fazer backup (.json)</button>
+        <label class="btn ghost" style="cursor:pointer">Importar backup<input type="file" id="bImport" accept=".json,application/json" class="sr"></label>
+      </div>
+      <div class="hint" id="storeInfo" style="margin-top:10px"></div>
+    </div>
+  </section>
+</div>
+
+<div id="report"></div>
+<datalist id="dl-colab"></datalist><datalist id="dl-quem"></datalist><datalist id="dl-rota"></datalist>
+
+<nav class="tabs" aria-label="Seções">
+  <button type="button" data-v="v-form" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Registrar</button>
+  <button type="button" data-v="v-list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Registros</button>
+  <button type="button" data-v="v-dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Painel</button>
+  <button type="button" data-v="v-rep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>Relatórios</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const LS_PREF="cattis_sa_pref_v1";
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const fmtBR=d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const fmtData=s=>{const[a,m,d]=String(s).split("-");return d?`${d}/${m}/${a}`:s};
+const fmtMes=m=>{const[a,b]=m.split("-");return ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"][+b-1]+" de "+a};
+const num=v=>{const n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:0};
+const money=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const kmf=n=>n.toLocaleString("pt-BR",{maximumFractionDigits:1});
+const norm=s=>String(s||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const TIPO={sobreaviso:"Sobreaviso",consignado:"Consignado"},TRANSP={carro:"Carro próprio",uber:"Uber",outro:"Outro"};
+let records=[],tipo="sobreaviso",transp="carro",pendingFile=null;
+const urlCache={};
+
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),2800)}
+function banner(t){const b=$("#banner");b.textContent=t||"";b.style.display=t?"block":"none"}
+
+/* ================= IndexedDB (dados no próprio celular) ================= */
+const DB={db:null,
+  open(){return new Promise((res,rej)=>{const r=indexedDB.open("cattis_sobreaviso",1);
+    r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("registros"))d.createObjectStore("registros",{keyPath:"id"});if(!d.objectStoreNames.contains("anexos"))d.createObjectStore("anexos")};
+    r.onsuccess=()=>{this.db=r.result;res()};r.onerror=()=>rej(r.error)})},
+  tx(store,mode,fn){return new Promise((res,rej)=>{const t=this.db.transaction(store,mode),q=fn(t.objectStore(store));let out;
+    if(q)q.onsuccess=()=>out=q.result;t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})},
+  all(){return this.tx("registros","readonly",s=>s.getAll())},
+  put(r){return this.tx("registros","readwrite",s=>s.put(r))},
+  putBlob(id,b){return this.tx("anexos","readwrite",s=>s.put(b,id))},
+  getBlob(id){return this.tx("anexos","readonly",s=>s.get(id))},
+};
+async function reload(){records=(await DB.all()).sort((a,b)=>b.eventTs-a.eventTs);render()}
+async function blobUrl(id){if(urlCache[id])return urlCache[id];const b=await DB.getBlob(id);if(!b)return "";return urlCache[id]=URL.createObjectURL(b)}
+
+/* ================= formulário ================= */
+function nowFill(){const d=new Date();$("#data").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;$("#hora").value=`${pad(d.getHours())}:${pad(d.getMinutes())}`}
+const curMonth=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}`};
+nowFill();["#fMes","#dMes","#rMes"].forEach(s=>$(s).value=curMonth());
+const pref=lsGet(LS_PREF,{});if(pref.colaborador)$("#colaborador").value=pref.colaborador;
+
+$$(".kind button").forEach(b=>b.addEventListener("click",()=>{tipo=b.dataset.k;$$(".kind button").forEach(x=>x.setAttribute("aria-pressed",x===b))}));
+function setTransp(t){transp=t;$$("#transp button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.t===t));
+  $("#lbl-anexo").textContent=t==="uber"?"Comprovante da rota do Uber":t==="carro"?"Comprovante de abastecimento":"Comprovante"}
+$$("#transp button").forEach(b=>b.addEventListener("click",()=>setTransp(b.dataset.t)));
+$$("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{$$("nav.tabs button").forEach(x=>x.removeAttribute("aria-current"));b.setAttribute("aria-current","page");
+  $$(".view").forEach(v=>v.classList.toggle("active",v.id===b.dataset.v));window.scrollTo(0,0);render()}));
+
+$("#file").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;
+  if(!/^image\//.test(f.type)&&f.type!=="application/pdf"){toast("Use imagem ou PDF");e.target.value="";return}
+  if(f.size>25*1024*1024){toast("Arquivo acima de 25 MB");e.target.value="";return}
+  pendingFile=f;$("#pvName").textContent=f.name;
+  $("#pvThumb").innerHTML=/^image\//.test(f.type)?`<img alt="" src="${URL.createObjectURL(f)}">`:`<span class="pdf">PDF</span>`;$("#preview").style.display="flex"});
+$("#pvClear").addEventListener("click",()=>{pendingFile=null;$("#file").value="";$("#preview").style.display="none"});
+
+function compressImage(file,maxSide,q){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{let w=img.naturalWidth,h=img.naturalHeight;const s=Math.min(1,maxSide/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
+    c.toBlob(b=>b?res(b):rej(new Error("compress")),"image/jpeg",q)};img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"))};img.src=url})}
+async function saveFile(file){const isImg=/^image\//.test(file.type);let blob=file;
+  if(isImg){try{blob=await compressImage(file,1600,.72)}catch(e){blob=file}}
+  const blobId="anx_"+uid();await DB.putBlob(blobId,blob);
+  return {blobId,tipo:isImg?"imagem":"pdf",mime:isImg?"image/jpeg":"application/pdf",nome:file.name,bytes:blob.size}}
+
+function validate(){let ok=true;const set=(k,bad)=>{document.querySelector(`[data-f="${k}"]`).classList.toggle("invalid",bad);if(bad)ok=false};
+  set("colaborador",!$("#colaborador").value.trim());
+  const ev=new Date($("#data").value+"T"+($("#hora").value||"00:00"));
+  set("data",!$("#data").value||isNaN(ev)||ev.getTime()>Date.now()+10*60000);set("hora",!$("#hora").value);
+  set("quem",!$("#quem").value.trim());set("motivo",$("#motivo").value.trim().length<15);set("rota",!$("#rota").value.trim());
+  const km=$("#km").value;set("km",km===""||num(km)<0||num(km)>2000);return ok}
+$$("#f input,#f textarea").forEach(i=>i.addEventListener("input",()=>i.closest(".field")&&i.closest(".field").classList.remove("invalid")));
+const hist=(acao,detalhe)=>({acao,detalhe:detalhe||"",em:new Date().toISOString(),porNome:$("#colaborador").value.trim()||(lsGet(LS_PREF,{}).colaborador)||"—"});
+
+$("#f").addEventListener("submit",async e=>{e.preventDefault();
+  if(!validate()){toast("Confira os campos destacados");const x=document.querySelector(".field.invalid input,.field.invalid textarea");x&&x.focus();return}
+  const btn=$("#save");btn.disabled=true;btn.textContent="Salvando…";
+  try{const anexo=pendingFile?await saveFile(pendingFile):null;const data=$("#data").value,hora=$("#hora").value;
+    const rec={id:uid(),tipo,colaborador:$("#colaborador").value.trim(),data,hora,eventTs:new Date(data+"T"+hora).getTime(),
+      motivo:$("#motivo").value.trim(),quem:$("#quem").value.trim(),rota:$("#rota").value.trim(),transporte:transp,km:num($("#km").value),
+      valor:$("#valor").value===""?null:num($("#valor").value),anexo,status:"ativo",criadoEm:new Date().toISOString(),
+      historico:[hist("criado",anexo?"com comprovante":"sem comprovante")]};
+    await DB.put(rec);lsSet(LS_PREF,{colaborador:rec.colaborador});
+    ["#motivo","#quem","#rota","#km","#valor"].forEach(s=>$(s).value="");$("#pvClear").click();nowFill();await reload();
+    toast(anexo?"Registro salvo":"Registro salvo · comprovante pendente")}
+  catch(err){console.error(err);toast(err&&err.name==="QuotaExceededError"?"Memória do celular cheia. Faça backup e libere espaço.":"Não foi possível salvar. Tente de novo.")}
+  finally{btn.disabled=false;btn.textContent="Salvar registro"}});
+
+async function attachLater(id,file){const r=records.find(x=>x.id===id);if(!r)return;
+  try{const anexo=await saveFile(file);await DB.put({...r,anexo,historico:[...(r.historico||[]),hist("comprovante anexado",anexo.nome)]});await reload();toast("Comprovante anexado")}
+  catch(e){toast("Falha ao anexar")}}
+async function cancelRec(id){const r=records.find(x=>x.id===id);if(!r)return;
+  const m=prompt("Motivo do cancelamento (fica na trilha de auditoria):");if(!m||!m.trim())return;
+  await DB.put({...r,status:"cancelado",historico:[...(r.historico||[]),hist("cancelado",m.trim())]});await reload();toast("Registro cancelado")}
+
+/* ================= cálculos ================= */
+const slaH=r=>(new Date(r.criadoEm).getTime()-r.eventTs)/3600000;
+const slaCls=h=>h<=24?"ok":h<=72?"warn":"bad";
+const slaTxt=h=>h<1?"Lançado em <1h":h<=72?`Lançado em ${Math.round(h)}h`:`Lançado ${Math.round(h/24)} dias depois`;
+const slaFaixa=h=>h<=24?"Verde (≤24h)":h<=72?"Amarelo (24–72h)":"Vermelho (>72h)";
+const active=a=>a.filter(r=>r.status!=="cancelado");
+function filt(m,t,c){return records.filter(r=>String(r.data).startsWith(m)&&(!t||r.tipo===t)&&(!c||norm(r.colaborador)===c))}
+function median(a){if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function group(list,key){const g={};list.forEach(r=>{const k=norm(r[key]);if(!k)return;const o=g[k]=g[k]||{label:r[key],n:0,km:0,valor:0,sa:0,cg:0,semComp:0};
+  o.n++;o.km+=r.km||0;o.valor+=r.valor||0;if(!r.anexo)o.semComp++;r.tipo==="consignado"?o.cg++:o.sa++});return Object.values(g).sort((a,b)=>b.n-a.n)}
+function stats(all){const act=active(all),sa=act.filter(r=>r.tipo==="sobreaviso"),cg=act.filter(r=>r.tipo==="consignado"),sl=act.map(slaH);
+  const comp=act.filter(r=>r.anexo).length;
+  return {all,act,sa,cg,km:act.reduce((s,r)=>s+(r.km||0),0),valor:act.reduce((s,r)=>s+(r.valor||0),0),comp,
+    pc:act.length?Math.round(comp/act.length*100):null,g:sl.filter(h=>h<=24).length,y:sl.filter(h=>h>24&&h<=72).length,rd:sl.filter(h=>h>72).length,
+    night:sa.filter(r=>{const h=+r.hora.slice(0,2);return h>=22||h<6}).length,canc:all.length-act.length}}
+function auditFlags(list){const act=active(list),flags=[],med=median(act.map(r=>r.km).filter(k=>k>0));
+  act.forEach(r=>{const who=`${r.colaborador} · ${fmtData(r.data)} ${r.hora}`;
+    if(!r.anexo)flags.push({lv:"warn",t:`Sem comprovante — ${who}`});
+    const h=slaH(r);if(h>72)flags.push({lv:"bad",t:`Lançado ${Math.round(h/24)} dias após o acionamento — ${who}`});
+    if(r.transporte==="carro"&&r.km===0)flags.push({lv:"warn",t:`Carro próprio com 0 km — ${who}`});
+    if(r.km>300||(act.length>=4&&med>0&&r.km>med*2.5))flags.push({lv:"warn",t:`KM fora do padrão (${kmf(r.km)} km; mediana ${kmf(med)}) — ${who}`});
+    if(r.transporte==="uber"&&r.valor==null)flags.push({lv:"info",t:`Uber sem valor informado — ${who}`})});
+  const byC={};act.forEach(r=>(byC[norm(r.colaborador)]=byC[norm(r.colaborador)]||[]).push(r));
+  Object.values(byC).forEach(a=>{a.sort((x,y)=>x.eventTs-y.eventTs);for(let i=1;i<a.length;i++)if(a[i].eventTs-a[i-1].eventTs<3600000)
+    flags.push({lv:"bad",t:`Possível duplicidade: ${a[i].colaborador} com 2 registros em menos de 1h (${fmtData(a[i].data)} ${a[i-1].hora} e ${a[i].hora})`})});
+  return flags}
+function suggestions(S,flags){const s=[],act=S.act;
+  if(act.length&&S.pc<90)s.push(`${act.length-S.comp} registro(s) sem comprovante. Anexe antes do fechamento do mês — sem comprovante o reembolso e a auditoria ficam sem evidência.`);
+  if(S.rd)s.push(`${S.rd} registro(s) lançados mais de 72h depois do acionamento. Combine com a equipe lançar no mesmo dia, ainda no local, para não perder hora, KM e comprovante.`);
+  const gq=group(act,"quem")[0];
+  if(gq&&act.length>=5&&gq.n/act.length>=.4)s.push(`${gq.label} concentra ${Math.round(gq.n/act.length*100)}% dos acionamentos. Vale investigar a causa recorrente (falta de material no consignado, pedido tardio, falha de programação) com esse solicitante.`);
+  if(S.sa.length>=3&&S.night/S.sa.length>=.5)s.push(`${S.night} de ${S.sa.length} sobreavisos foram entre 22h e 6h. Avalie antecipar a separação de material no fim do expediente para os hospitais que mais acionam.`);
+  const stop=new Set("sobre para pelo pela como mais porque quando estava foram tinha hospital material cirurgia paciente realizada".split(" ")),wc={};
+  act.forEach(r=>new Set(norm(r.motivo).split(/[^a-z0-9]+/).filter(w=>w.length>=5&&!stop.has(w))).forEach(w=>wc[w]=(wc[w]||0)+1));
+  const top=Object.entries(wc).filter(e=>e[1]>=3).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if(top.length)s.push(`Termos que mais se repetem nos motivos: ${top.map(t=>`“${t[0]}” (${t[1]}x)`).join(", ")}. Padrão repetido costuma indicar causa-raiz tratável.`);
+  s.push(`Contagens de consignado no período: ${S.cg.length}. Referência do processo: duas conferências por hospital por mês (1ª e 2ª quinzena). Informe o hospital na Rota para permitir essa checagem.`);
+  if(flags.some(f=>/duplicidade/.test(f.t)))s.push("Há possíveis lançamentos duplicados. Confira e cancele o repetido com justificativa — o registro fica na trilha.");
+  return s}
+
+/* ================= telas ================= */
+function refreshLists(){const u=k=>[...new Set(records.map(r=>r[k]).filter(Boolean))].slice(0,40).map(v=>`<option value="${esc(v)}">`).join("");
+  $("#dl-colab").innerHTML=u("colaborador");$("#dl-quem").innerHTML=u("quem");$("#dl-rota").innerHTML=u("rota");
+  const cur=$("#rColab").value;$("#rColab").innerHTML=`<option value="">Todos</option>`+group(records,"colaborador").map(g=>`<option value="${esc(norm(g.label))}">${esc(g.label)}</option>`).join("");$("#rColab").value=cur}
+function renderList(){const q=norm($("#fBusca").value);
+  const list=filt($("#fMes").value,$("#fTipo").value).filter(r=>!q||norm([r.colaborador,r.motivo,r.rota,r.quem].join(" ")).includes(q));
+  if(!list.length){$("#list").innerHTML=`<div class="empty">Nenhum registro neste filtro.</div>`;return}
+  $("#list").innerHTML=list.map(r=>{const h=slaH(r),canc=r.status==="cancelado";
+    const chips=[`<span class="chip">${TIPO[r.tipo]}</span>`,canc?`<span class="chip bad">Cancelado</span>`:`<span class="chip ${slaCls(h)}">${slaTxt(h)}</span>`,
+      r.anexo?`<span class="chip ok">Com comprovante</span>`:`<span class="chip warn">Comprovante pendente</span>`].join("");
+    const att=r.anexo?(r.anexo.tipo==="pdf"?`<a class="link" data-pdf="${esc(r.anexo.blobId)}" href="#">Abrir PDF do comprovante</a>`:`<img alt="Comprovante" data-blob="${esc(r.anexo.blobId)}">`):"";
+    const hs=(r.historico||[]).map(x=>`<div>${fmtBR(new Date(x.em))} · ${esc(x.acao)}${x.detalhe?": "+esc(x.detalhe):""} · ${esc(x.porNome||"—")}</div>`).join("");
+    return `<details class="rec ${r.tipo} ${canc?"cancelado":""}"><summary><div class="l1"><span>${esc(r.colaborador)}</span><span>${kmf(r.km||0)} km</span></div>
+      <div class="l2">${fmtData(r.data)} às ${esc(r.hora)} · ${esc(r.quem)}</div><div class="chips">${chips}</div></summary>
+      <div class="body"><dl class="kv"><dt>Motivo</dt><dd>${esc(r.motivo)}</dd><dt>Rota</dt><dd>${esc(r.rota)}</dd>
+      <dt>Transporte</dt><dd>${TRANSP[r.transporte]||esc(r.transporte)}</dd>${r.valor!=null?`<dt>Valor</dt><dd>${money(r.valor)}</dd>`:""}
+      <dt>Registrado</dt><dd>${fmtBR(new Date(r.criadoEm))}</dd></dl><div class="att">${att}</div>
+      ${canc?"":`<div class="acts">${r.anexo?"":`<label class="btn small ghost" style="cursor:pointer">Anexar comprovante<input type="file" accept="image/*,application/pdf" class="sr" data-attach="${esc(r.id)}"></label>`}
+      <button class="btn small ghost" type="button" data-cancel="${esc(r.id)}" style="color:var(--bad)">Cancelar registro</button></div>`}
+      <div class="hist"><b>Trilha de auditoria</b>${hs}</div></div></details>`}).join("");
+  $$("#list img[data-blob]").forEach(async i=>{i.src=await blobUrl(i.dataset.blob)})}
+$("#list").addEventListener("change",e=>{const i=e.target.closest("[data-attach]");if(i&&i.files[0])attachLater(i.dataset.attach,i.files[0])});
+$("#list").addEventListener("click",async e=>{const b=e.target.closest("[data-cancel]");if(b)return cancelRec(b.dataset.cancel);
+  const p=e.target.closest("[data-pdf]");if(p){e.preventDefault();const u=await blobUrl(p.dataset.pdf);if(u)window.open(u,"_blank")}});
+["#fMes","#fTipo","#fBusca"].forEach(s=>$(s).addEventListener("input",renderList));$("#dMes").addEventListener("input",renderDash);
+
+function bars(el,rows){rows=rows.slice(0,8);if(!rows.length){el.innerHTML=`<div class="hint">Sem dados no mês.</div>`;return}const max=rows[0].n;
+  el.innerHTML=rows.map(v=>`<div class="bar"><div class="h"><span>${esc(v.label)}</span><span>${v.n} · ${kmf(v.km)} km</span></div>
+    <div class="track" style="width:${Math.max(8,v.n/max*100)}%"><i style="width:${v.sa/v.n*100}%;background:var(--sa)"></i><i style="width:${v.cg/v.n*100}%;background:var(--cg)"></i></div></div>`).join("")
+  +`<div class="legend" style="margin-top:6px"><span><b style="background:var(--sa)"></b>Sobreaviso</span><span><b style="background:var(--cg)"></b>Consignado</span></div>`}
+function renderDash(){const S=stats(filt($("#dMes").value)),A=S.act,n=A.length||1;
+  $("#kpis").innerHTML=[["sa",S.sa.length,"Acionamentos de sobreaviso"],["cg",S.cg.length,"Contagens de consignado"],
+    ["",kmf(S.km)+" km",`Total rodado · média ${A.length?kmf(S.km/A.length):0} km`],["",S.valor?money(S.valor):"—","Valor informado (Uber/abast.)"],
+    ["",S.pc==null?"—":S.pc+"%",`Com comprovante (${S.comp}/${A.length})`],["",A.length?Math.round(S.g/A.length*100)+"%":"—",`Lançados em até 24h (${S.g}/${A.length})`]]
+    .map(([c,v,t])=>`<div class="kpi ${c}"><div class="v">${v}</div><div class="t">${t}</div></div>`).join("");
+  $("#sla").innerHTML=A.length?`<div class="slabar"><i style="width:${S.g/n*100}%;background:var(--ok)"></i><i style="width:${S.y/n*100}%;background:var(--warn)"></i><i style="width:${S.rd/n*100}%;background:var(--bad)"></i></div>
+    <div class="legend"><span><b style="background:var(--ok)"></b>Até 24h: ${S.g}</span><span><b style="background:var(--warn)"></b>24–72h: ${S.y}</span><span><b style="background:var(--bad)"></b>Mais de 72h: ${S.rd}</span></div>
+    <div class="hint" style="margin-top:8px">Meta sugerida: 100% em até 24h. Base: ${A.length} registros ativos${S.canc?`; ${S.canc} cancelado(s) fora do cálculo`:""}.</div>`:`<div class="hint">Sem registros no mês.</div>`;
+  bars($("#byColab"),group(A,"colaborador"));bars($("#byQuem"),group(A,"quem"));
+  const flags=auditFlags(S.all),col={bad:"var(--bad)",warn:"var(--warn)",info:"var(--blue)"};
+  $("#audit").innerHTML=flags.length?flags.slice(0,30).map(f=>`<div class="alert"><span class="s" style="background:${col[f.lv]}"></span><span>${esc(f.t)}</span></div>`).join("")
+    +(flags.length>30?`<div class="hint">+${flags.length-30} outros pontos</div>`:""):`<div class="hint">Nenhum ponto de auditoria no mês.</div>`;
+  $("#sugs").innerHTML=suggestions(S,flags).map(t=>`<div class="sug">${esc(t)}</div>`).join("")}
+async function renderRep(){let t=`${records.length} registro(s) guardados neste celular.`;
+  try{if(navigator.storage&&navigator.storage.estimate){const e=await navigator.storage.estimate();t+=` Espaço usado: ${(e.usage/1048576).toFixed(1)} MB.`}
+    if(navigator.storage&&navigator.storage.persisted){t+=(await navigator.storage.persisted())?" Armazenamento protegido contra limpeza automática.":" Faça backups: o sistema pode limpar dados de apps pouco usados."}}catch(e){}
+  $("#storeInfo").textContent=t}
+function render(){refreshLists();const v=$(".view.active").id;if(v==="v-list")renderList();if(v==="v-dash")renderDash();if(v==="v-rep")renderRep()}
+
+/* ================= compartilhar / baixar arquivos ================= */
+async function deliver(filename,blob){
+  const file=new File([blob],filename,{type:blob.type});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:filename});return}}catch(e){if(e&&e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+const rSel=()=>({m:$("#rMes").value,t:$("#rTipo").value,c:$("#rColab").value});
+
+$("#bCsv").addEventListener("click",()=>{const{m,t,c}=rSel(),rows=filt(m,t,c).sort((a,b)=>a.eventTs-b.eventTs);if(!rows.length)return toast("Sem registros no filtro");
+  const h=["Tipo","Colaborador","Data","Hora","Quem acionou","Motivo","Rota","Transporte","KM","Valor R$","Comprovante","Status","Registrado em","Horas até lançar","SLA lançamento"];
+  const q=v=>`"${String(v==null?"":v).replace(/"/g,'""').replace(/\r?\n/g," ")}"`,br=n=>String(n).replace(".",",");
+  const lines=rows.map(r=>{const s=slaH(r);return [TIPO[r.tipo],r.colaborador,fmtData(r.data),r.hora,r.quem,r.motivo,r.rota,TRANSP[r.transporte],br(r.km||0),
+    r.valor==null?"":br(r.valor),r.anexo?"Sim":"Pendente",r.status,fmtBR(new Date(r.criadoEm)),br(Math.round(s*10)/10),slaFaixa(s)].map(q).join(";")});
+  deliver(`sobreaviso-consignado-${m}.csv`,new Blob(["\ufeff"+[h.map(q).join(";"),...lines].join("\r\n")],{type:"text/csv"}))});
+
+$("#bPdf").addEventListener("click",async()=>{const{m,t,c}=rSel(),all=filt(m,t,c).sort((a,b)=>a.eventTs-b.eventTs);if(!all.length)return toast("Sem registros no filtro");
+  const S=stats(all),A=S.act,flags=auditFlags(all),sugs=suggestions(S,flags),n=A.length||1,pct=x=>A.length?Math.round(x/n*100)+"%":"—";
+  const colabNome=c?(group(records,"colaborador").find(g=>norm(g.label)===c)||{}).label:"Todos";
+  const tbl=(rows,heads)=>`<table><thead><tr>${heads.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>`;
+  let html=`<h1>Relatório de sobreaviso e contagem de consignado</h1>
+    <div class="meta">Cattis Medical · Estoque/Logística<br>Período: ${fmtMes(m)} · Tipo: ${t?TIPO[t]:"Todos"} · Colaborador: ${esc(colabNome)}<br>Gerado em ${fmtBR(new Date())}</div>
+    <h3>Indicadores</h3><div class="kgrid">
+      <div class="k"><b>${S.sa.length}</b>Acionamentos de sobreaviso</div><div class="k"><b>${S.cg.length}</b>Contagens de consignado</div>
+      <div class="k"><b>${kmf(S.km)} km</b>Total rodado (média ${A.length?kmf(S.km/A.length):0})</div><div class="k"><b>${S.valor?money(S.valor):"—"}</b>Valor informado</div>
+      <div class="k"><b>${S.pc==null?"—":S.pc+"%"}</b>Com comprovante (${S.comp}/${A.length})</div><div class="k"><b>${pct(S.g)}</b>Lançados em até 24h</div></div>
+    <h3>SLA de lançamento</h3>${tbl([`<tr><td class="v">Verde (até 24h)</td><td class="num">${S.g}</td><td class="num">${pct(S.g)}</td></tr>`,
+      `<tr><td class="a">Amarelo (24–72h)</td><td class="num">${S.y}</td><td class="num">${pct(S.y)}</td></tr>`,
+      `<tr><td class="r">Vermelho (mais de 72h)</td><td class="num">${S.rd}</td><td class="num">${pct(S.rd)}</td></tr>`],["Faixa","Registros","%"])}
+    <p style="font-size:8.5pt;color:#555">Base: ${A.length} registros ativos${S.canc?`; ${S.canc} cancelado(s) excluído(s) do cálculo`:""}. Mede o tempo entre o acionamento e o lançamento no app.</p>
+    <h3>Resumo por colaborador</h3>${tbl(group(A,"colaborador").map(g=>`<tr><td>${esc(g.label)}</td><td class="num">${g.sa}</td><td class="num">${g.cg}</td><td class="num">${kmf(g.km)}</td><td class="num">${g.valor?money(g.valor):"—"}</td><td class="num">${g.semComp}</td></tr>`),
+      ["Colaborador","Sobreaviso","Consignado","KM","Valor","Sem comprovante"])}
+    <h3>Quem acionou</h3>${tbl(group(A,"quem").map(g=>`<tr><td>${esc(g.label)}</td><td class="num">${g.n}</td><td class="num">${pct(g.n)}</td></tr>`),["Solicitante","Acionamentos","%"])}
+    <h3>Registros</h3>${tbl(all.map(r=>{const s=slaH(r),cl=s<=24?"v":s<=72?"a":"r";return `<tr><td>${fmtData(r.data)}<br>${esc(r.hora)}</td><td>${TIPO[r.tipo]}</td><td>${esc(r.colaborador)}</td><td>${esc(r.quem)}</td><td>${esc(r.motivo)}</td><td>${esc(r.rota)}<br><i>${TRANSP[r.transporte]}</i></td><td class="num">${kmf(r.km||0)}</td><td class="num">${r.valor!=null?money(r.valor):"—"}</td><td>${r.anexo?"Sim":"<span class='a'>Pendente</span>"}</td><td class="${r.status==="cancelado"?"r":cl}">${r.status==="cancelado"?"Cancelado":Math.round(s)+"h"}</td></tr>`}),
+      ["Data","Tipo","Colaborador","Quem acionou","Motivo","Rota","KM","Valor","Compr.","SLA"])}
+    <h3>Auditoria</h3>${flags.length?`<ul>${flags.map(f=>`<li class="${f.lv==="bad"?"r":f.lv==="warn"?"a":""}">${esc(f.t)}</li>`).join("")}</ul>`:"<p>Nenhum ponto de auditoria no período.</p>"}
+    <h3>Sugestões de melhoria</h3><ul>${sugs.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>
+    <div class="sign"><div>Colaborador</div><div>Gestor responsável</div></div>`;
+  if($("#rAnx").checked){const withA=A.filter(r=>r.anexo);if(withA.length){html+=`<h3 style="page-break-before:always">Comprovantes</h3>`;
+    for(const r of withA){const u=await blobUrl(r.anexo.blobId);
+      html+=`<div class="anx"><b>${esc(r.colaborador)} · ${fmtData(r.data)} ${esc(r.hora)} · ${TIPO[r.tipo]} · ${kmf(r.km||0)} km</b><br>${esc(r.rota)}
+        ${r.anexo.tipo==="pdf"?"<br><i>Comprovante em PDF — enviar junto com este relatório (disponível no app).</i>":`<img src="${u}" alt="">`}</div>`}}}
+  const rep=$("#report");rep.innerHTML=html;
+  await Promise.all([...rep.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  document.title=`Relatorio-sobreaviso-${m}${c?"-"+c.replace(/\s+/g,"-"):""}`;
+  setTimeout(()=>{window.print();document.title="Cattis · Sobreaviso e Consignado"},150)});
+
+/* ================= backup / importação ================= */
+const toDataURL=b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b)});
+$("#bBackup").addEventListener("click",async()=>{if(!records.length)return toast("Nada para salvar ainda");toast("Preparando backup…");
+  const anexos={};for(const r of records)if(r.anexo&&r.anexo.blobId){const b=await DB.getBlob(r.anexo.blobId);if(b)anexos[r.anexo.blobId]=await toDataURL(b)}
+  const who=norm(lsGet(LS_PREF,{}).colaborador||"celular").replace(/[^a-z0-9]+/g,"-"),d=new Date();
+  const payload={app:"cattis-sobreaviso",versao:1,exportadoEm:d.toISOString(),registros:records,anexos};
+  await deliver(`backup-sobreaviso-${who}-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`,new Blob([JSON.stringify(payload)],{type:"application/json"}));
+  lsSet("cattis_sa_lastbackup",d.toISOString())});
+$("#bImport").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{const p=JSON.parse(await f.text());if(p.app!=="cattis-sobreaviso"||!Array.isArray(p.registros))throw new Error("formato");
+    let novos=0,atual=0;const have=Object.fromEntries(records.map(r=>[r.id,r]));
+    for(const r of p.registros){if(!r||!r.id)continue;const ex=have[r.id];
+      if(ex&&(ex.historico||[]).length>=(r.historico||[]).length)continue;
+      if(r.anexo&&r.anexo.blobId&&p.anexos&&p.anexos[r.anexo.blobId]){const b=await (await fetch(p.anexos[r.anexo.blobId])).blob();await DB.putBlob(r.anexo.blobId,b)}
+      await DB.put({...r,historico:[...(r.historico||[]),{acao:"importado",detalhe:f.name,em:new Date().toISOString(),porNome:lsGet(LS_PREF,{}).colaborador||"—"}]});ex?atual++:novos++}
+    await reload();toast(`Importado: ${novos} novo(s), ${atual} atualizado(s)`)}
+  catch(err){console.error(err);toast("Arquivo de backup inválido")}});
+
+/* ================= início ================= */
+(async function boot(){
+  try{await DB.open()}catch(e){banner("Este navegador não permite salvar dados. Abra o app pelo ícone instalado na tela inicial.");$("#save").disabled=true;return}
+  try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
+  if("serviceWorker" in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+  const lb=lsGet("cattis_sa_lastbackup",null);
+  await reload();
+  if(records.length>=5&&(!lb||Date.now()-new Date(lb).getTime()>7*864e5))banner("Faz mais de 7 dias sem backup. Vá em Relatórios › Fazer backup.");
+  const upd=()=>{$("#syncTxt").textContent=navigator.onLine?"Salvo no celular":"Offline · salvo no celular"};upd();addEventListener("online",upd);addEventListener("offline",upd);
+})();
+})();
+</script>
+</body>
+</html>

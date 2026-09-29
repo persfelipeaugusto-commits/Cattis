@@ -1,0 +1,91 @@
+CATTIS · SOBREAVISO E CONSIGNADO — APP PARA CELULAR (OFFLINE)
+===============================================================
+
+O QUE É
+Um app instalado na tela inicial do celular (Android ou iPhone). Depois de
+instalado, abre sem internet e sem o Claude. Todos os registros e fotos de
+comprovante ficam salvos DENTRO do próprio celular.
+
+ARQUIVOS DESTA PASTA (não renomeie nem separe)
+  index.html .............. o app
+  manifest.json ........... nome, ícone e cores do app
+  sw.js ................... faz o app funcionar offline
+  icon-*.png / apple-touch-icon.png ... ícones
+
+---------------------------------------------------------------
+PASSO 1 — COLOCAR O APP NUM ENDEREÇO (feito UMA vez, no computador)
+---------------------------------------------------------------
+O celular só instala um app assim a partir de um link https. O link serve
+apenas para baixar o app; os dados da equipe NUNCA vão para esse site.
+
+Opção A — Netlify (mais fácil, grátis)
+  1. Descompacte o .zip. Você terá a pasta "sobreaviso-app".
+  2. Acesse https://app.netlify.com e crie uma conta grátis (pode entrar com
+     o Google). Crie a conta ANTES de enviar: sem conta, o site é apagado.
+  3. Vá em "Add new site" > "Deploy manually".
+  4. Arraste a PASTA "sobreaviso-app" inteira para a área indicada.
+  5. Em segundos aparece um link do tipo https://nome-aleatorio.netlify.app
+     Em "Site configuration" > "Change site name" você pode trocar para
+     algo como https://cattis-sobreaviso.netlify.app
+  6. Envie esse link para a equipe (WhatsApp/e-mail).
+
+Opção B — GitHub Pages (grátis): crie um repositório, envie os arquivos,
+  ative Settings > Pages. Use se a TI da Cattis preferir.
+
+Opção C — Servidor/intranet da Cattis: a TI pode hospedar a pasta em
+  qualquer endereço https interno.
+
+---------------------------------------------------------------
+PASSO 2 — INSTALAR NO CELULAR (cada colaborador, precisa de internet só agora)
+---------------------------------------------------------------
+ANDROID (Chrome)
+  1. Abra o link no Google Chrome.
+  2. Toque no menu ⋮ (canto superior direito).
+  3. Toque em "Instalar app" (ou "Adicionar à tela inicial") > Instalar.
+  4. O ícone "Sobreaviso" aparece junto com os outros apps.
+
+IPHONE (Safari — tem que ser o Safari)
+  1. Abra o link no Safari.
+  2. Toque no botão Compartilhar (quadrado com seta para cima).
+  3. Role e toque em "Adicionar à Tela de Início" > Adicionar.
+  4. Abra SEMPRE pelo ícone, não pelo Safari (os dados ficam no app instalado).
+
+TESTE: depois de instalar, coloque o celular em modo avião e abra o ícone.
+Ele deve abrir normalmente e permitir registrar.
+
+---------------------------------------------------------------
+PASSO 3 — USO NO DIA A DIA
+---------------------------------------------------------------
+Registrar ... escolha Sobreaviso ou Consignado, preencha e anexe a foto
+              do comprovante (abastecimento ou rota do Uber).
+Registros ... consulta, anexar comprovante depois, cancelar com motivo.
+Painel ...... KPIs, SLA de lançamento, auditoria e sugestões do mês.
+Relatórios .. PDF do mês (com fotos dos comprovantes e campo de
+              assinatura), planilha .csv para Excel e backup.
+
+Relatório PDF: toque em "Relatório em PDF" > na tela de impressão escolha
+"Salvar como PDF" (Android) ou toque em Compartilhar/Salvar em Arquivos
+(iPhone). Depois envie por WhatsApp ou e-mail.
+
+---------------------------------------------------------------
+IMPORTANTE — BACKUP E CONSOLIDAÇÃO DA EQUIPE
+---------------------------------------------------------------
+* Os dados ficam só no celular. Se o app for desinstalado, o celular for
+  formatado ou trocado, os dados somem. Faça "Fazer backup" toda semana e
+  guarde o arquivo .json (Drive, e-mail ou WhatsApp para você mesmo).
+  O app avisa quando passa de 7 dias sem backup.
+* Para o gestor ver a equipe toda: cada colaborador envia o backup .json;
+  o gestor abre Relatórios > "Importar backup" no celular dele. Registros
+  repetidos não duplicam. O Painel e os relatórios passam a mostrar todos.
+* Não limpe os "dados de navegação/site" do Chrome ou Safari: isso apaga
+  os registros.
+
+ATUALIZAR O APP
+  Substitua os arquivos no Netlify (arraste a pasta de novo em "Deploys").
+  Na próxima vez que o celular abrir o app com internet, ele atualiza;
+  os registros são mantidos.
+
+OPCIONAL — GERAR UM .APK DE ANDROID
+  Com o link publicado, acesse https://www.pwabuilder.com, cole o link e
+  gere o pacote Android. Só é necessário se a Cattis quiser distribuir
+  por arquivo .apk ou pela Play Store; para a equipe, o Passo 2 basta.
